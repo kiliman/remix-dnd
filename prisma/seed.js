@@ -14,26 +14,22 @@ seed();
 function getTasks() {
   return [
     {
-      id: "9sd8f7",
-      index: "0",
+      position: 1,
       name: "Task Five",
       isCompleted: false,
     },
     {
-      id: "79s8d",
-      index: "1",
+      position: 2,
       name: "Task Two",
       isCompleted: true,
     },
     {
-      id: "6f7sd",
-      index: "2",
+      position: 3,
       name: "Task Three",
       isCompleted: false,
     },
     {
-      id: "gh8f76",
-      index: "3",
+      position: 4,
       name: "Task Four",
       isCompleted: true,
     },

@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "Task" (
-    "index" INTEGER NOT NULL,
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "position" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "isCompleted" BOOLEAN NOT NULL DEFAULT false
 );

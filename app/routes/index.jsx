@@ -5,14 +5,13 @@ import { db } from "~/utils/db.server";
 import Draggable from "~/components/Draggable";
 import { v4 as uuidv4 } from "uuid";
 
-const MAX = 5;
 const HEIGHT = 80;
 
 export const loader = async () => {
   const data = {
     tasks: await db.task.findMany({
       orderBy: {
-        index: "asc",
+        position: "asc",
       },
     }),
   };
@@ -21,10 +20,10 @@ export const loader = async () => {
 
 const App = () => {
   const data = useLoaderData();
-  const transition = useTransition();
-  const fetcher = useFetcher();
   const taskList = data.tasks;
   const items = range(taskList.length);
+  const transition = useTransition();
+  const fetcher = useFetcher();
   const [state, setState] = useState({
     order: items,
     dragOrder: items, // items order while dragging
@@ -93,7 +92,7 @@ const App = () => {
                     }
               }
             >
-              {task.name}
+              {state.order[task.id] + " = " + task.name}
               <input type="checkbox" defaultChecked={task.isCompleted} />
             </div>
           </Draggable>
