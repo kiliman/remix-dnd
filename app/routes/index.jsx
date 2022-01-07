@@ -61,7 +61,7 @@ const App = () => {
 
     const reorderedTasks = taskList.map((task, i) => ({
       ...task,
-      position: state.order[task.id - 1],
+      position: state.order[taskList[i]],
       name: taskList[i].name,
       isCompleted: taskList[i].isCompleted,
     }));
@@ -141,7 +141,31 @@ const App = () => {
                     onChange={handleToggle}
                   />
                 </fetcher.Form>
-                <span style={{ width: "100%" }}>{task.name}</span>
+                <fetcher.Form
+                  method="post"
+                  onBlur={(e) => handleUpdate(e)}
+                  style={{ width: "100%" }}
+                >
+                  <div>
+                    <input type="hidden" name="actionName" value="update" />
+                    <input type="hidden" value={taskName} />
+                    <input
+                      name="taskToUpdate"
+                      id={task.id}
+                      style={
+                        task.isCompleted
+                          ? {
+                              textDecoration: "line-through 2px #ABABAB",
+                            }
+                          : { textDecoration: "none" }
+                      }
+                      className="inline-text-input"
+                      onChange={(e) => setTaskName(e.target.value)}
+                      defaultValue={task.name}
+                      autoComplete="off"
+                    />
+                  </div>
+                </fetcher.Form>
                 <fetcher.Form method="post" action="/actions">
                   <input type="hidden" name="actionName" value="delete" />
                   <button type="submit" name="taskToDelete" value={task.id}>
