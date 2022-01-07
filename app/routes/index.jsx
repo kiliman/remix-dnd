@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { redirect, useLoaderData, useFetcher, useTransition } from "remix";
+import React, { useState, useCallback } from "react";
+import { useLoaderData, useFetcher, useTransition } from "remix";
 import { range, inRange } from "lodash";
 import { db } from "~/utils/db.server";
 import Draggable from "~/components/Draggable";
-import { v4 as uuidv4 } from "uuid";
+import TaskForm from "~/components/TaskForm";
 
-const HEIGHT = 80;
+const HEIGHT = 55;
 
 export const loader = async () => {
   const data = {
@@ -57,47 +57,70 @@ const App = () => {
       order: state.dragOrder,
       draggedIndex: null,
     }));
-  }, []);
+
+    const reorderedTasks = taskList.map((task, i) => ({
+      ...task,
+      position: state.order[task.id - 1],
+      name: taskList[i].name,
+      isCompleted: taskList[i].isCompleted,
+    }));
+
+    fetcher.submit(
+      {
+        taskList: JSON.stringify(reorderedTasks),
+        subaction: "dnd",
+      },
+      { method: "post", action: "/actions", replace: true }
+    );
+  }, [fetcher, taskList, state.order]);
 
   return (
     <div className="container">
       {transition.state === "submitting" && <span>Saving...</span>}
-      {taskList.map((task, index) => {
-        const isDragging = state.draggedIndex === index;
-        const top = state.dragOrder.indexOf(index) * (HEIGHT + 10);
-        const draggedTop = state.order.indexOf(index) * (HEIGHT + 10);
+      <TaskForm />
+      <div style={{ position: "relative", height: HEIGHT * taskList.length }}>
+        {taskList.map((task, index) => {
+          const isDragging = state.draggedIndex === index;
+          const top = state.dragOrder.indexOf(index) * HEIGHT;
+          const draggedTop = state.order.indexOf(index) * HEIGHT;
 
-        return (
-          <Draggable
-            key={index}
-            id={index}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-          >
-            <div
-              className="task-item"
-              isDragging={isDragging}
-              top={isDragging ? draggedTop : top}
-              style={
-                isDragging
-                  ? {
-                      transition: "none",
-                      height: HEIGHT + "px",
-                      top: 100 + draggedTop + "px",
-                    }
-                  : {
-                      transition: "all 500ms",
-                      height: HEIGHT + "px",
-                      top: 100 + top + "px",
-                    }
-              }
+          return (
+            <Draggable
+              key={index}
+              id={index}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
             >
-              {state.order[task.id] + " = " + task.name}
-              <input type="checkbox" defaultChecked={task.isCompleted} />
-            </div>
-          </Draggable>
-        );
-      })}
+              <div
+                className="task-item"
+                style={
+                  isDragging
+                    ? {
+                        transition: "none",
+                        height: HEIGHT + "px",
+                        top: draggedTop + "px",
+                        boxShadow: "0 5px 10px rgba(0, 0, 0, 0.15)",
+                      }
+                    : {
+                        transition: "all 500ms",
+                        height: HEIGHT + "px",
+                        top: top + "px",
+                      }
+                }
+              >
+                <input type="checkbox" defaultChecked={task.isCompleted} />
+                <span style={{ width: "100%" }}>{task.name}</span>
+                <fetcher.Form method="post" action="/actions">
+                  <input type="hidden" name="actionName" value="delete" />
+                  <button type="submit" name="taskToDelete" value={task.id}>
+                    x
+                  </button>
+                </fetcher.Form>
+              </div>
+            </Draggable>
+          );
+        })}
+      </div>
     </div>
   );
 };

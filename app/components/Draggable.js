@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 const POSITION = { x: 0, y: 0 };
 
@@ -61,7 +61,6 @@ const Draggable = ({ children, id, onDrag, onDragEnd }) => {
       transform: `translate(${state.translation.x}px, ${state.translation.y}px)`,
       transition: state.isDragging ? "none" : "transform 500ms",
       zIndex: state.isDragging ? 2 : 1,
-      position: state.isDragging ? "absolute" : "relative",
     }),
     [state.isDragging, state.translation]
   );
