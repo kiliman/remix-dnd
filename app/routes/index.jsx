@@ -24,6 +24,7 @@ const App = () => {
   const items = range(taskList.length);
   const transition = useTransition();
   const fetcher = useFetcher();
+  const [taskName, setTaskName] = useState("");
   const [state, setState] = useState({
     order: items,
     dragOrder: items, // items order while dragging
@@ -74,6 +75,30 @@ const App = () => {
     );
   }, [fetcher, taskList, state.order]);
 
+  const handleToggle = (event) => {
+    const { checked } = event.target;
+    const { value } = event.target;
+    fetcher.submit(
+      {
+        checked: checked.toString(),
+        taskToToggleId: value,
+        actionName: "toggle",
+      },
+      { method: "post", action: "/actions", replace: true }
+    );
+  };
+
+  const handleUpdate = (event) => {
+    fetcher.submit(
+      {
+        taskToUpdateName: event.target.value,
+        taskToUpdateId: event.target.id,
+        actionName: "update",
+      },
+      { method: "post", action: "/actions", replace: true }
+    );
+  };
+
   return (
     <div className="container">
       {transition.state === "submitting" && <span>Saving...</span>}
@@ -108,7 +133,14 @@ const App = () => {
                       }
                 }
               >
-                <input type="checkbox" defaultChecked={task.isCompleted} />
+                <fetcher.Form method="post">
+                  <input
+                    type="checkbox"
+                    value={task.id}
+                    defaultChecked={task.isCompleted}
+                    onChange={handleToggle}
+                  />
+                </fetcher.Form>
                 <span style={{ width: "100%" }}>{task.name}</span>
                 <fetcher.Form method="post" action="/actions">
                   <input type="hidden" name="actionName" value="delete" />

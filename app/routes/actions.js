@@ -13,72 +13,56 @@ export const action = async ({ request }) => {
   const taskToDeleteId = form.get("taskToDelete");
   const actionName = form.get("actionName");
 
-  console.log("CURRENT TASK: ", parsedTaskList[0].name);
+  // console.log("CURRENT TASK: ", parsedTaskList[0].name);
+  const fields = { taskToCreateName };
 
-  for (let i = 0; i < parsedTaskList.length; i++) {
-    await db.task.update({
-      where: {
-        id: parsedTaskList[i].id,
-      },
-      data: {
-        position: parsedTaskList[i].position,
-        name: parsedTaskList[i].name,
-        isCompleted: parsedTaskList[i].isCompleted,
-      },
-    });
-  }
-
-  return redirect("/");
-};
-
-switch (actionName) {
-  case "create":
-    const fields = { name: taskToCreateName };
-    await db.task.create({ data: fields });
-    break;
-  case "toggle":
-    await db.task.update({
-      where: {
-        id: taskToToggleId,
-      },
-      data: {
-        isCompleted: taskToToggleChecked,
-      },
-    });
-    break;
-  case "update":
-    await db.task.update({
-      where: {
-        id: taskToUpdateId,
-      },
-      data: {
-        name: taskToUpdateName,
-      },
-    });
-    break;
-  case "dnd":
-    for (let i = 0; i < parsedTaskList.length; i++) {
+  switch (actionName) {
+    case "create":
+      await db.task.create({ data: fields });
+      break;
+    case "toggle":
       await db.task.update({
         where: {
-          id: parsedTaskList[i].id,
+          id: parseInt(taskToToggleId),
         },
         data: {
-          position: parsedTaskList[i].position,
-          name: parsedTaskList[i].name,
-          isCompleted: parsedTaskList[i].isCompleted,
+          isCompleted: taskToToggleChecked,
         },
       });
-    }
-    break;
-  case "delete":
-    await db.task.delete({
-      where: {
-        id: taskToDeleteId,
-      },
-    });
-    break;
-  default:
-    break;
-}
-return redirect("/");
+      break;
+    case "update":
+      await db.task.update({
+        where: {
+          id: parseInt(taskToUpdateId),
+        },
+        data: {
+          name: taskToUpdateName,
+        },
+      });
+      break;
+    case "dnd":
+      for (let i = 0; i < parsedTaskList.length; i++) {
+        await db.task.update({
+          where: {
+            id: parsedTaskList[i].id,
+          },
+          data: {
+            position: parsedTaskList[i].position,
+            name: parsedTaskList[i].name,
+            isCompleted: parsedTaskList[i].isCompleted,
+          },
+        });
+      }
+      break;
+    case "delete":
+      await db.task.delete({
+        where: {
+          id: parseInt(taskToDeleteId),
+        },
+      });
+      break;
+    default:
+      break;
+  }
+  return redirect("/");
 };

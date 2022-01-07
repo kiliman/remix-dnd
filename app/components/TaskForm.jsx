@@ -1,13 +1,13 @@
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { Form } from "remix";
 
 export default function TaskForm() {
   // useRef to clear the input after submit
-  const addTaskRef = useRef<HTMLInputElement>(null);
+  const addTaskRef = useRef(null);
 
   function clearInput() {
     // setTimeout(() => (addTaskRef!.current!.value = ""), 1);
-    addTaskRef!.current!.value = "";
+    addTaskRef.current.value = "";
   }
 
   return (
