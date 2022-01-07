@@ -5,6 +5,7 @@ export const action = async ({ request }) => {
   const form = await request.formData();
   const taskList = form.get("taskList");
   const parsedTaskList = JSON.parse(taskList);
+  const position = form.get("position");
   const taskToCreateName = form.get("taskName");
   const taskToToggleId = form.get("taskToToggleId");
   const taskToToggleChecked = form.get("checked") === "true";
@@ -13,8 +14,9 @@ export const action = async ({ request }) => {
   const taskToDeleteId = form.get("taskToDelete");
   const actionName = form.get("actionName");
 
-  // console.log("CURRENT TASK: ", parsedTaskList[0].name);
-  const fields = { taskToCreateName };
+  console.log("POSITION: ", position);
+
+  const fields = { name: taskToCreateName, position: parseInt(position) };
 
   switch (actionName) {
     case "create":
@@ -41,7 +43,7 @@ export const action = async ({ request }) => {
       });
       break;
     case "dnd":
-      for (let i = 0; i < parsedTaskList.length; i++) {
+      for (let i = 0; i < parsedTaskList[0].length; i++) {
         await db.task.update({
           where: {
             id: parsedTaskList[i].id,

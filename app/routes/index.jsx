@@ -102,7 +102,7 @@ const App = () => {
   return (
     <div className="container">
       {transition.state === "submitting" && <span>Saving...</span>}
-      <TaskForm />
+      <TaskForm position={taskList.length + 1} />
       <div style={{ position: "relative", height: HEIGHT * taskList.length }}>
         {taskList.map((task, index) => {
           const isDragging = state.draggedIndex === index;
