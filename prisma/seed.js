@@ -14,22 +14,26 @@ seed();
 function getTasks() {
   return [
     {
-      position: 1,
+      position: 0,
+      taskIndex: 0,
       name: "Task Five",
       isCompleted: false,
     },
     {
-      position: 2,
+      position: 1,
+      taskIndex: 1,
       name: "Task Two",
       isCompleted: true,
     },
     {
-      position: 3,
+      position: 2,
+      taskIndex: 2,
       name: "Task Three",
       isCompleted: false,
     },
     {
-      position: 4,
+      position: 3,
+      taskIndex: 3,
       name: "Task Four",
       isCompleted: true,
     },

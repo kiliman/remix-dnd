@@ -3,9 +3,8 @@ import { db } from "~/utils/db.server";
 
 export const action = async ({ request }) => {
   const form = await request.formData();
-  const taskList = form.get("taskList");
-  const parsedTaskList = JSON.parse(taskList);
   const position = form.get("position");
+  const taskIndex = form.get("taskIndex");
   const taskToCreateName = form.get("taskName");
   const taskToToggleId = form.get("taskToToggleId");
   const taskToToggleChecked = form.get("checked") === "true";
@@ -13,10 +12,15 @@ export const action = async ({ request }) => {
   const taskToUpdateName = form.get("taskToUpdateName");
   const taskToDeleteId = form.get("taskToDelete");
   const actionName = form.get("actionName");
+  const taskList = form.get("taskList");
+  const parsedTaskList = JSON.parse(taskList);
 
-  console.log("POSITION: ", position);
-
-  const fields = { name: taskToCreateName, position: parseInt(position) };
+  // console.log("CURRENT TASK: ", parsedTaskList[0].name);
+  const fields = {
+    name: taskToCreateName,
+    position: parseInt(position),
+    taskIndex: parseInt(taskIndex),
+  };
 
   switch (actionName) {
     case "create":
@@ -25,7 +29,7 @@ export const action = async ({ request }) => {
     case "toggle":
       await db.task.update({
         where: {
-          id: parseInt(taskToToggleId),
+          id: taskToToggleId,
         },
         data: {
           isCompleted: taskToToggleChecked,
@@ -35,7 +39,7 @@ export const action = async ({ request }) => {
     case "update":
       await db.task.update({
         where: {
-          id: parseInt(taskToUpdateId),
+          id: taskToUpdateId,
         },
         data: {
           name: taskToUpdateName,
@@ -43,13 +47,14 @@ export const action = async ({ request }) => {
       });
       break;
     case "dnd":
-      for (let i = 0; i < parsedTaskList[0].length; i++) {
+      for (let i = 0; i < parsedTaskList.length; i++) {
         await db.task.update({
           where: {
             id: parsedTaskList[i].id,
           },
           data: {
-            position: parsedTaskList[i].position,
+            position: position,
+            taskIndex: parsedTaskList[i].taskIndex,
             name: parsedTaskList[i].name,
             isCompleted: parsedTaskList[i].isCompleted,
           },
@@ -59,7 +64,7 @@ export const action = async ({ request }) => {
     case "delete":
       await db.task.delete({
         where: {
-          id: parseInt(taskToDeleteId),
+          id: taskToDeleteId,
         },
       });
       break;

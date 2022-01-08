@@ -11,7 +11,8 @@ datasource db {
 }
 
 model Task {
-  id          Int     @id @default(autoincrement())
+  id          String     @id @default(uuid())
+  taskIndex   Int
   position    Int
   name        String
   isCompleted Boolean @default(false)
