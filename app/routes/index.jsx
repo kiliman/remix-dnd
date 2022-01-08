@@ -62,7 +62,6 @@ const App = () => {
     const reorderedTasks = taskList.map((task, i) => ({
       ...task,
       position: state.order.indexOf(i),
-      // taskIndex: state.order[0],
       name: taskList[i].name,
       isCompleted: taskList[i].isCompleted,
     }));

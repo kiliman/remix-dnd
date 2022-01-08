@@ -4,7 +4,6 @@ import { db } from "~/utils/db.server";
 export const action = async ({ request }) => {
   const form = await request.formData();
   const position = form.get("position");
-  const taskIndex = form.get("taskIndex");
   const taskToCreateName = form.get("taskName");
   const taskToToggleId = form.get("taskToToggleId");
   const taskToToggleChecked = form.get("checked") === "true";
@@ -19,7 +18,6 @@ export const action = async ({ request }) => {
   const fields = {
     name: taskToCreateName,
     position: parseInt(position),
-    taskIndex: parseInt(taskIndex),
   };
 
   switch (actionName) {
@@ -54,7 +52,6 @@ export const action = async ({ request }) => {
           },
           data: {
             position: position,
-            taskIndex: parsedTaskList[i].taskIndex,
             name: parsedTaskList[i].name,
             isCompleted: parsedTaskList[i].isCompleted,
           },

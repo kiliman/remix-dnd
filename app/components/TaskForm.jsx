@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Form } from "remix";
 
-export default function TaskForm({ position, taskIndex }) {
+export default function TaskForm({ position }) {
   // useRef to clear the input after submit
   const addTaskRef = useRef(null);
 
@@ -23,7 +23,6 @@ export default function TaskForm({ position, taskIndex }) {
         {/* add a hidden input to define a actionName */}
         <input type="hidden" name="actionName" value="create" />
         <input type="hidden" name="position" value={position} />
-        <input type="hidden" name="taskIndex" value={position} />
         <input
           ref={addTaskRef}
           className="add-task-input"
