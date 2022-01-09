@@ -70,7 +70,7 @@ const App = () => {
       {
         taskList: JSON.stringify(reorderedTasks),
         actionName: "dnd",
-        position: state.order.indexOf(index),
+        position: JSON.stringify(state.order),
       },
       { method: "post", action: "/actions", replace: true }
     );
@@ -103,7 +103,7 @@ const App = () => {
   return (
     <div className="container">
       {transition.state === "submitting" && <span>Saving...</span>}
-      <TaskForm position={taskList.length + 1} />
+      <TaskForm position={taskList.length} />
       <div style={{ position: "relative", height: HEIGHT * taskList.length }}>
         {taskList.map((task, index) => {
           const isDragging = state.draggedIndex === index;

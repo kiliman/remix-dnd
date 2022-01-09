@@ -14,7 +14,8 @@ export const action = async ({ request }) => {
   const taskList = form.get("taskList");
   const parsedTaskList = JSON.parse(taskList);
 
-  // console.log("CURRENT TASK: ", parsedTaskList[0].name);
+  const parsedPosition = JSON.parse(position);
+  console.log("PARSED STATE ORDER: ", parsedPosition);
   const fields = {
     name: taskToCreateName,
     position: parseInt(position),
@@ -51,7 +52,8 @@ export const action = async ({ request }) => {
             id: parsedTaskList[i].id,
           },
           data: {
-            position: position,
+            position: parseInt(parsedPosition[i]),
+            id: parsedTaskList[i].id,
             name: parsedTaskList[i].name,
             isCompleted: parsedTaskList[i].isCompleted,
           },
@@ -64,6 +66,18 @@ export const action = async ({ request }) => {
           id: taskToDeleteId,
         },
       });
+      for (let i = 0; i < parsedTaskList.length; i++) {
+        await db.task.update({
+          where: {
+            id: parsedTaskList[i].id,
+          },
+          data: {
+            position: position,
+            // name: parsedTaskList[i].name,
+            // isCompleted: parsedTaskList[i].isCompleted,
+          },
+        });
+      }
       break;
     default:
       break;
