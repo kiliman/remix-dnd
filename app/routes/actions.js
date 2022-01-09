@@ -10,6 +10,7 @@ export const action = async ({ request }) => {
   const taskToUpdateId = form.get("taskToUpdateId");
   const taskToUpdateName = form.get("taskToUpdateName");
   const taskToDeleteId = form.get("taskToDelete");
+  const taskToDeletePosition = form.get("taskToDeletePosition");
   const actionName = form.get("actionName");
   const taskList = form.get("taskList");
   const parsedTaskList = JSON.parse(taskList);
@@ -20,6 +21,8 @@ export const action = async ({ request }) => {
     name: taskToCreateName,
     position: parseInt(position),
   };
+  const fixedTasks = (taskToDeletePosition) =>
+    taskToDeletePosition.map((task, index) => ({ ...task, position: index }));
 
   switch (actionName) {
     case "create":
@@ -66,15 +69,16 @@ export const action = async ({ request }) => {
           id: taskToDeleteId,
         },
       });
-      for (let i = 0; i < parsedTaskList.length; i++) {
-        await db.task.update({
+      for (let i = 0; i < fixedTasks.length; i++) {
+        db.task.update({
           where: {
-            id: parsedTaskList[i].id,
+            id: fixedTasks[i].id,
           },
           data: {
-            position: position,
-            // name: parsedTaskList[i].name,
-            // isCompleted: parsedTaskList[i].isCompleted,
+            id: fixedTasks[i].id,
+            name: fixedTasks[i].name,
+            position: parseInt(fixedTasks[i].position),
+            isCompleted: fixedTasks[i].isCompleted,
           },
         });
       }

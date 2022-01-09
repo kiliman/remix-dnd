@@ -174,6 +174,11 @@ const App = () => {
                 </div>
                 <fetcher.Form method="post" action="/actions">
                   <input type="hidden" name="actionName" value="delete" />
+                  <input
+                    type="hidden"
+                    name="taskToDeletePosition"
+                    value={JSON.stringify(state.order)}
+                  />
                   <button type="submit" name="taskToDelete" value={task.id}>
                     x
                   </button>
