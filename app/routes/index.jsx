@@ -148,27 +148,30 @@ const App = () => {
                     onBlur={(e) => handleUpdate(e)}
                     style={{ width: "100%" }}
                   >
-                    <div>
-                      <input type="hidden" name="actionName" value="update" />
-                      <input type="hidden" value={taskName} />
-                      <input
-                        name="taskToUpdate"
-                        id={task.id}
-                        style={
-                          task.isCompleted
-                            ? {
-                                textDecoration: "line-through 2px #ABABAB",
-                              }
-                            : { textDecoration: "none" }
-                        }
-                        className="inline-text-input"
-                        onChange={(e) => setTaskName(e.target.value)}
-                        defaultValue={
-                          // HERE IT IS!
-                          task.name + " = " + state.order.indexOf(index)
-                        }
-                        autoComplete="off"
-                      />
+                    <div style={{ display: "flex" }}>
+                      <div>
+                        <input type="hidden" name="actionName" value="update" />
+                        <input type="hidden" value={taskName} />
+                        <input
+                          name="taskToUpdate"
+                          id={task.id}
+                          style={
+                            task.isCompleted
+                              ? {
+                                  textDecoration: "line-through 2px #ABABAB",
+                                }
+                              : { textDecoration: "none" }
+                          }
+                          className="inline-text-input"
+                          onChange={(e) => setTaskName(e.target.value)}
+                          defaultValue={
+                            // HERE IT IS!
+                            task.name
+                          }
+                          autoComplete="off"
+                        />
+                        <span> = {state.order.indexOf(index)}</span>
+                      </div>
                     </div>
                   </fetcher.Form>
                 </div>
