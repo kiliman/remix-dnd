@@ -1,14 +1,8 @@
-import React, { useRef } from "react";
-import { Form } from "remix";
+import React from "react";
+import { Form, useLocation } from "remix";
 
 export default function TaskForm({ position }) {
-  // useRef to clear the input after submit
-  const addTaskRef = useRef(null);
-
-  function clearInput() {
-    // setTimeout(() => (addTaskRef!.current!.value = ""), 1);
-    addTaskRef.current.value = "";
-  }
+  const location = useLocation(); // resets form after submit
 
   return (
     <Form
@@ -16,18 +10,16 @@ export default function TaskForm({ position }) {
       method="post"
       // send this form to the actions route to recieve its actions
       action="/actions"
-      // clear the input
-      onSubmit={() => clearInput}
+      key={location.key}
     >
       <div style={{ width: "100%" }}>
         {/* add a hidden input to define a actionName */}
         <input type="hidden" name="actionName" value="create" />
         <input type="hidden" name="position" value={position} />
         <input
-          ref={addTaskRef}
           className="add-task-input"
           type="text"
-          name="taskName"
+          name="name"
           placeholder="Add Task"
           autoComplete="off"
         />

@@ -40,7 +40,7 @@ body {
 }
 
 .task-item {
-  position: absolute;
+  /*position: absolute;*/
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -70,14 +70,14 @@ body {
   background: var(--primary-light);
 }
 /* Delete Button */
-[name="taskToDelete"] {
+[data-action="delete"] {
   background: transparent;
   border: none;
   transition: transform 0.25s;
   outline-offset: -12px;
 }
 /* Delete Button:hover */
-[name="taskToDelete"]:hover {
+[data-action="delete"]:hover {
   transform: scale(1.25);
 }
 input[type="checkbox"] {

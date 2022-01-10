@@ -1,10 +1,8 @@
-import React, { useState, useCallback } from "react";
-import { useLoaderData, useFetcher, useTransition } from "remix";
-import { range, inRange } from "lodash";
+import React, { useState, useEffect, useCallback } from "react";
+import { useLoaderData, useFetcher, useTransition, useLocation } from "remix";
+import { ReactSortable } from "react-sortablejs";
 import { db } from "~/utils/db.server";
-import Draggable from "~/components/Draggable";
 import TaskForm from "~/components/TaskForm";
-
 const HEIGHT = 55;
 
 export const loader = async () => {
@@ -19,82 +17,59 @@ export const loader = async () => {
 };
 
 const App = () => {
-  const data = useLoaderData();
-  const taskList = data.tasks;
-  const items = range(taskList.length);
+  const { tasks } = useLoaderData();
   const transition = useTransition();
   const fetcher = useFetcher();
-  const [taskName, setTaskName] = useState("");
-  const [state, setState] = useState({
-    order: items,
-    dragOrder: items, // items order while dragging
-    draggedIndex: null,
-  });
+  const [state, setState] = useState(tasks);
+  useEffect(() => {
+    setState(tasks);
+  }, [tasks]);
 
-  const handleDrag = useCallback(
-    ({ translation, id }) => {
-      const delta = Math.round(translation.y / HEIGHT);
-      const index = state.order.indexOf(id);
-      const dragOrder = state.order.filter((index) => index !== id);
+  const handleDragEnd = useCallback(
+    (newTasks) => {
+      // prevent running during SSR
+      if (typeof window === "undefined") return;
 
-      if (!inRange(index + delta, 0, items.length)) {
-        return;
-      }
+      const oldIds = tasks.map((task) => task.id);
+      const newIds = newTasks.map((task) => task.id);
+      // return if nothing changed
+      if (compareArray(oldIds, newIds)) return;
 
-      dragOrder.splice(index + delta, 0, id);
+      setState(newTasks);
 
-      setState((state) => ({
-        ...state,
-        draggedIndex: id,
-        dragOrder,
-      }));
+      fetcher.submit(
+        {
+          actionName: "dnd",
+          taskIds: newIds,
+        },
+        { method: "post", action: "/actions", replace: true }
+      );
     },
-    [state.order, items.length]
+    [fetcher, tasks]
   );
 
-  const handleDragEnd = useCallback(() => {
-    setState((state) => ({
-      ...state,
-      order: state.dragOrder,
-      draggedIndex: null,
-    }));
-
-    const reorderedTasks = taskList.map((task, i) => ({
-      ...task,
-      position: state.order.indexOf(i),
-      name: taskList[i].name,
-      isCompleted: taskList[i].isCompleted,
-    }));
-
-    fetcher.submit(
-      {
-        taskList: JSON.stringify(reorderedTasks),
-        actionName: "dnd",
-        position: JSON.stringify(state.order),
-      },
-      { method: "post", action: "/actions", replace: true }
-    );
-  }, [fetcher, taskList, state.order]);
-
   const handleToggle = (event) => {
-    const { checked } = event.target;
-    const { value } = event.target;
+    const { value, checked } = event.target;
+    const task = state.find((task) => task.id === value);
+    task.isCompleted = checked;
+    setState(state);
     fetcher.submit(
       {
-        checked: checked.toString(),
-        taskToToggleId: value,
         actionName: "toggle",
+        id: value,
+        isCompleted: checked,
       },
       { method: "post", action: "/actions", replace: true }
     );
   };
 
   const handleUpdate = (event) => {
+    const { id, value } = event.target;
     fetcher.submit(
       {
-        taskToUpdateName: event.target.value,
-        taskToUpdateId: event.target.id,
         actionName: "update",
+        id,
+        name: value,
       },
       { method: "post", action: "/actions", replace: true }
     );
@@ -103,96 +78,77 @@ const App = () => {
   return (
     <div className="container">
       {transition.state === "submitting" && <span>Saving...</span>}
-      <TaskForm position={taskList.length} />
-      <div style={{ position: "relative", height: HEIGHT * taskList.length }}>
-        {taskList.map((task, index) => {
-          const isDragging = state.draggedIndex === index;
-          const top = state.dragOrder.indexOf(index) * HEIGHT;
-          const draggedTop = state.order.indexOf(index) * HEIGHT;
-
-          return (
-            <Draggable
-              key={index}
-              id={index}
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
-            >
-              <div
-                className="task-item"
-                style={
-                  isDragging
-                    ? {
-                        transition: "none",
-                        height: HEIGHT + "px",
-                        top: draggedTop + "px",
-                        boxShadow: "0 5px 10px rgba(0, 0, 0, 0.15)",
-                      }
-                    : {
-                        transition: "all 500ms",
-                        height: HEIGHT + "px",
-                        top: top + "px",
-                      }
-                }
-              >
-                <fetcher.Form method="post">
-                  <input
-                    type="checkbox"
-                    value={task.id}
-                    defaultChecked={task.isCompleted}
-                    onChange={handleToggle}
-                  />
-                </fetcher.Form>
-                <div>
-                  <fetcher.Form
-                    method="post"
-                    onBlur={(e) => handleUpdate(e)}
-                    style={{ width: "100%" }}
-                  >
-                    <div style={{ display: "flex" }}>
-                      <div>
-                        <input type="hidden" name="actionName" value="update" />
-                        <input type="hidden" value={taskName} />
-                        <input
-                          name="taskToUpdate"
-                          id={task.id}
-                          style={
-                            task.isCompleted
-                              ? {
-                                  textDecoration: "line-through 2px #ABABAB",
-                                }
-                              : { textDecoration: "none" }
-                          }
-                          className="inline-text-input"
-                          onChange={(e) => setTaskName(e.target.value)}
-                          defaultValue={
-                            // HERE IT IS!
-                            task.name
-                          }
-                          autoComplete="off"
-                        />
-                        <span> = {state.order.indexOf(index)}</span>
-                      </div>
+      <TaskForm position={tasks.length} />
+      <div style={{ position: "relative", height: HEIGHT * tasks.length }}>
+        <ReactSortable list={state} setList={handleDragEnd}>
+          {state.map((task) => (
+            <div key={task.id} className="task-item">
+              <fetcher.Form method="post">
+                <input
+                  type="checkbox"
+                  value={task.id}
+                  defaultChecked={task.isCompleted}
+                  onChange={handleToggle}
+                />
+              </fetcher.Form>
+              <div>
+                <fetcher.Form
+                  method="post"
+                  action="/actions"
+                  onBlur={(e) => handleUpdate(e)}
+                  style={{ width: "100%" }}
+                >
+                  <input type="hidden" name="actionName" value="update" />
+                  <input type="hidden" name="id" value={task.id} />
+                  <div style={{ display: "flex" }}>
+                    <div>
+                      <input
+                        name="name"
+                        id={task.id}
+                        style={
+                          task.isCompleted
+                            ? {
+                                textDecoration: "line-through 2px #ABABAB",
+                              }
+                            : { textDecoration: "none" }
+                        }
+                        className="inline-text-input"
+                        defaultValue={
+                          // HERE IT IS!
+                          task.name
+                        }
+                        autoComplete="off"
+                      />
+                      <span> = {task.position}</span>
                     </div>
-                  </fetcher.Form>
-                </div>
-                <fetcher.Form method="post" action="/actions">
-                  <input type="hidden" name="actionName" value="delete" />
-                  <input
-                    type="hidden"
-                    name="taskToDeletePosition"
-                    value={JSON.stringify(state.order)}
-                  />
-                  <button type="submit" name="taskToDelete" value={task.id}>
-                    x
-                  </button>
+                  </div>
                 </fetcher.Form>
               </div>
-            </Draggable>
-          );
-        })}
+              <fetcher.Form method="post" action="/actions">
+                <input type="hidden" name="actionName" value="delete" />
+                <button
+                  type="submit"
+                  name="id"
+                  data-action="delete"
+                  value={task.id}
+                >
+                  x
+                </button>
+              </fetcher.Form>
+            </div>
+          ))}
+        </ReactSortable>
       </div>
     </div>
   );
 };
+
+function compareArray(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
 
 export default App;
