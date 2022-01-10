@@ -48,32 +48,32 @@ export const action = async ({ request }) => {
         },
       });
       break;
-    // case "dnd":
-    //   for (let i = 0; i < parsedTaskList.length; i++) {
-    //     await db.task.update({
-    //       where: {
-    //         id: parsedTaskList[i].id,
-    //       },
-    //       data: {
-    //         position: parseInt(parsedPosition[i]),
-    //       },
-    //     });
-    //   }
-    //   break;
     case "dnd":
-      await Promise.all(
-        parsedTaskList.map((parsedTask, i) =>
-          db.task.update({
-            where: {
-              id: parsedTask.id,
-            },
-            data: {
-              position: parseInt(parsedPosition[i], 10),
-            },
-          })
-        )
-      );
+      for (let i = 0; i < parsedTaskList.length; i++) {
+        await db.task.update({
+          where: {
+            id: parsedTaskList[i].id,
+          },
+          data: {
+            position: parseInt(parsedPosition[i]),
+          },
+        });
+      }
       break;
+    // case "dnd":
+    //   await Promise.all(
+    //     parsedTaskList.map((parsedTask, i) =>
+    //       db.task.update({
+    //         where: {
+    //           id: parsedTask.id,
+    //         },
+    //         data: {
+    //           position: parseInt(parsedPosition[i], 10),
+    //         },
+    //       })
+    //     )
+    //   );
+    //   break;
     // case "delete":
     //   await db.task.delete({
     //     where: {
@@ -93,26 +93,26 @@ export const action = async ({ request }) => {
     //     )
     //   );
     //   break;
-    // case "delete":
-    //   await db.task.delete({
-    //     where: {
-    //       id: taskToDeleteId,
-    //     },
-    //   });
-    //   for (let i = 0; i < fixedTasks.length; i++) {
-    //     db.task.update({
-    //       where: {
-    //         id: fixedTasks[i].id,
-    //       },
-    //       data: {
-    //         id: fixedTasks[i].id,
-    //         name: fixedTasks[i].name,
-    //         position: parseInt(fixedTasks[i].position),
-    //         isCompleted: fixedTasks[i].isCompleted,
-    //       },
-    //     });
-    //   }
-    //   break;
+    case "delete":
+      await db.task.delete({
+        where: {
+          id: taskToDeleteId,
+        },
+      });
+      for (let i = 0; i < fixedTasks.length; i++) {
+        db.task.update({
+          where: {
+            id: fixedTasks[i].id,
+          },
+          data: {
+            id: fixedTasks[i].id,
+            name: fixedTasks[i].name,
+            position: parseInt(fixedTasks[i].position),
+            isCompleted: fixedTasks[i].isCompleted,
+          },
+        });
+      }
+      break;
     default:
       break;
   }
